@@ -86,7 +86,7 @@ def download_dataset(force: bool = False) -> Path:
 def load_raw_data(filepath: Optional[Path] = None,
                   sheet: str = "Year 2010-2011") -> pd.DataFrame:
     """
-    Load raw transaction data from the Excel file.
+    Load raw transaction data from the Excel file (or fast parquet cache if available).
 
     The workbook has two sheets:
       - 'Year 2009-2010'
@@ -94,6 +94,10 @@ def load_raw_data(filepath: Optional[Path] = None,
 
     CustomerID is loaded as str to prevent float conversion of IDs.
     """
+    parquet_path = DATA_DIR / f"{sheet.replace(' ', '_').lower()}.parquet"
+    if parquet_path.exists() and filepath is None:
+        return pd.read_parquet(parquet_path)
+
     if filepath is None:
         filepath = DATA_DIR / XLSX_FILENAME
         if not filepath.exists():
@@ -105,6 +109,12 @@ def load_raw_data(filepath: Optional[Path] = None,
         engine="openpyxl",
         dtype={"Customer ID": str},   # prevent 12345.0 CustomerID values
     )
+
+    try:
+        df.to_parquet(parquet_path, index=False)
+    except Exception:
+        pass
+
     return df
 
 
