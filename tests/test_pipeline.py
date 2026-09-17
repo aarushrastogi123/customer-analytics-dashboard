@@ -14,25 +14,47 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Add src to sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Ensure both project root and src/ are on sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SRC_DIR = PROJECT_ROOT / "src"
+for path in [str(SRC_DIR), str(PROJECT_ROOT)]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
-from preprocessing import clean_data, validate_raw
-from rfm import add_rfm_scores, compute_rfm
-from segmentation import (
-    assign_segments,
-    choose_k,
-    compute_elbow_silhouette,
-    scale_rfm,
-    train_kmeans,
-)
-from campaign_model import (
-    build_features_target,
-    evaluate_model,
-    score_all_customers,
-    train_model,
-)
-from insights import generate_insights
+try:
+    from src.preprocessing import clean_data, validate_raw
+    from src.rfm import add_rfm_scores, compute_rfm
+    from src.segmentation import (
+        assign_segments,
+        choose_k,
+        compute_elbow_silhouette,
+        scale_rfm,
+        train_kmeans,
+    )
+    from src.campaign_model import (
+        build_features_target,
+        evaluate_model,
+        score_all_customers,
+        train_model,
+    )
+    from src.insights import generate_insights
+except ImportError:
+    from preprocessing import clean_data, validate_raw
+    from rfm import add_rfm_scores, compute_rfm
+    from segmentation import (
+        assign_segments,
+        choose_k,
+        compute_elbow_silhouette,
+        scale_rfm,
+        train_kmeans,
+    )
+    from campaign_model import (
+        build_features_target,
+        evaluate_model,
+        score_all_customers,
+        train_model,
+    )
+    from insights import generate_insights
 
 
 class TestCustomerAnalyticsPipeline(unittest.TestCase):
